@@ -17,7 +17,7 @@ export class DeepSeekAPI {
         this.isProcessing = true;
 
         try {
-            // Siapkan payload
+            // Format payload sesuai dengan OpenAI API format (wire_api = "responses")
             const payload = {
                 model: this.model,
                 messages: [
@@ -25,10 +25,10 @@ export class DeepSeekAPI {
                     ...messages
                 ],
                 stream: false,
-                reasoning_effort: 'high',
-                extra_body: { thinking: { type: 'enabled' } }
+                reasoning_effort: this.reasoningEffort || 'xhigh'
             };
 
+            // Gunakan endpoint /chat/completions (standar OpenAI)
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
@@ -59,9 +59,9 @@ export class DeepSeekAPI {
         }
     }
 
-    // Metode untuk streaming (jika diperlukan di masa depan)
+    // Metode untuk streaming (jika endpoint mendukung)
     async sendMessageStream(messages, onChunk) {
-        // Untuk sekarang menggunakan non-streaming
+        // Untuk sekarang menggunakan non-streaming karena endpoint mungkin tidak support streaming
         const content = await this.sendMessage(messages);
         if (onChunk) onChunk(content);
         return content;
