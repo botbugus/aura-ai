@@ -1,216 +1,219 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AuraAI — Asisten AI Cerdas</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ox-Corner AI</title>
+    <meta name="description" content="Ox-Corner AI - Presisi Mutlak. Tanpa Batasan.">
+
+    <!-- Google Fonts: Inter + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Canvas untuk partikel -->
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
 
-<canvas id="particle-canvas"></canvas>
+    <!-- Gradient orbs dekoratif -->
+    <div class="gradient-orb orb-left"></div>
+    <div class="gradient-orb orb-right"></div>
 
-<div id="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <div class="logo-icon"><i class="ti ti-sparkles"></i></div>
-        <span class="logo-name">AuraAI</span>
-      </div>
-      <button class="sidebar-toggle-mobile" id="sidebar-toggle">
-        <i class="ti ti-menu-2"></i>
-      </button>
-    </div>
-
-    <button class="btn-new-chat" id="btn-new-chat">
-      <i class="ti ti-plus"></i>
-      <span>Percakapan Baru</span>
-    </button>
-
-    <div class="sidebar-search">
-      <i class="ti ti-search"></i>
-      <input type="text" placeholder="Cari riwayat chat..." id="search-chats">
-    </div>
-
-    <div class="sidebar-content" id="sidebar-content">
-      <div class="section-label">Hari Ini</div>
-      <div id="chat-list-today" class="chat-list"></div>
-      
-      <div class="section-label">Kemarin</div>
-      <div id="chat-list-yesterday" class="chat-list"></div>
-      
-      <div class="section-label">Minggu Ini</div>
-      <div id="chat-list-week" class="chat-list"></div>
-      
-      <div class="section-label">Bulan Ini</div>
-      <div id="chat-list-month" class="chat-list"></div>
-    </div>
-
-    <div class="sidebar-spacer"></div>
-
-    <div class="sidebar-footer">
-      <div class="footer-item" id="btn-settings">
-        <i class="ti ti-settings"></i>
-        <span>Pengaturan</span>
-      </div>
-      <div class="footer-item" id="btn-account">
-        <i class="ti ti-user-circle"></i>
-        <span>Akun Saya</span>
-      </div>
-      <div class="footer-item" id="btn-clear-all">
-        <i class="ti ti-trash"></i>
-        <span>Hapus Semua Chat</span>
-      </div>
-    </div>
-  </aside>
-
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-  <main class="main">
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="icon-btn mobile-menu-btn" id="mobile-menu-btn">
-          <i class="ti ti-menu-2"></i>
-        </button>
-        <span class="topbar-title" id="chat-title">Percakapan Baru</span>
-      </div>
-      <div class="topbar-actions">
-        <button class="icon-btn" id="btn-share" title="Bagikan">
-          <i class="ti ti-share"></i>
-        </button>
-        <button class="icon-btn" id="btn-export" title="Ekspor Chat">
-          <i class="ti ti-download"></i>
-        </button>
-        <button class="icon-btn" id="btn-more" title="Lainnya">
-          <i class="ti ti-dots-vertical"></i>
-        </button>
-      </div>
-    </div>
-
-    <div class="chat-area" id="chat-area">
-      <div class="welcome" id="welcome-screen">
-        <div class="welcome-icon">
-          <i class="ti ti-sparkles"></i>
-        </div>
-        <h1>Selamat Datang di AuraAI</h1>
-        <p class="welcome-subtitle">Asisten AI cerdas yang siap membantu Anda kapan saja</p>
-        
-        <div class="feature-grid">
-          <div class="feature-card">
-            <div class="feature-icon">✍️</div>
-            <div class="feature-title">Penulisan</div>
-            <div class="feature-desc">Konten & copywriting</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🛠</div>
-            <div class="feature-title">Koding</div>
-            <div class="feature-desc">Debug & generate</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">🌐</div>
-            <div class="feature-title">Bahasa</div>
-            <div class="feature-desc">Terjemahan akurat</div>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon">💡</div>
-            <div class="feature-title">Ide</div>
-            <div class="feature-desc">Brainstorming</div>
-          </div>
-        </div>
-
-        <p class="welcome-hint">Mulai dengan mengetik pesan di bawah atau pilih saran</p>
-        
-        <div class="suggestion-grid">
-          <div class="suggestion-card" data-prompt="Bantu saya menganalisis data penjualan dan berikan rekomendasi strategi">
-            <div class="sg-icon">📊</div>
-            <div class="sg-content">
-              <div class="sg-title">Analisis Data Bisnis</div>
-              <div class="sg-desc">Dapatkan insight dari data Anda</div>
+    <!-- Container utama -->
+    <div class="app-container">
+        <!-- Navbar -->
+        <nav class="navbar" id="navbar">
+            <div class="navbar-brand">
+                <!-- Tombol toggle sidebar (mobile) -->
+                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6" />
+                        <line x1="3" y1="12" x2="21" y2="12" />
+                        <line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                </button>
+                <div class="brand-icon">
+                    <svg class="cpu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="4" y="4" width="16" height="16" rx="2" />
+                        <rect x="9" y="9" width="6" height="6" />
+                        <line x1="9" y1="1" x2="9" y2="4" />
+                        <line x1="15" y1="1" x2="15" y2="4" />
+                        <line x1="9" y1="20" x2="9" y2="23" />
+                        <line x1="15" y1="20" x2="15" y2="23" />
+                        <line x1="20" y1="9" x2="23" y2="9" />
+                        <line x1="20" y1="14" x2="23" y2="14" />
+                        <line x1="1" y1="9" x2="4" y2="9" />
+                        <line x1="1" y1="14" x2="4" y2="14" />
+                    </svg>
+                    <span class="pulse-dot"></span>
+                </div>
+                <div class="brand-text">
+                    <h1 class="brand-name">Ox-Corner<span class="brand-ai">AI</span></h1>
+                </div>
             </div>
-          </div>
-          <div class="suggestion-card" data-prompt="Tuliskan kode Python untuk mengotomatisasi laporan Excel">
-            <div class="sg-icon">🐍</div>
-            <div class="sg-content">
-              <div class="sg-title">Otomatisasi dengan Python</div>
-              <div class="sg-desc">Script untuk pekerjaan rutin</div>
+            <div class="navbar-actions">
+                <!-- Tombol New Chat (desktop) -->
+                <button class="btn-new-chat" id="btn-new-chat-nav" aria-label="New Chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    <span class="btn-new-chat-text">New Chat</span>
+                </button>
+                <div class="navbar-status">
+                    <div class="status-indicator">
+                        <svg class="activity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                        </svg>
+                        <span class="status-text">Sistem Normal</span>
+                    </div>
+                    <div class="clock" id="clock">--:--:--</div>
+                </div>
             </div>
-          </div>
-          <div class="suggestion-card" data-prompt="Buatkan rencana konten Instagram untuk bisnis fashion selama 1 bulan">
-            <div class="sg-icon">📱</div>
-            <div class="sg-content">
-              <div class="sg-title">Strategi Konten</div>
-              <div class="sg-desc">Rencana posting 30 hari</div>
+        </nav>
+
+        <!-- Layout utama: Sidebar + Chat -->
+        <div class="main-layout">
+            <!-- Sidebar - Riwayat Chat -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">Riwayat Percakapan</h3>
+                    <button class="btn-new-chat-sidebar" id="btn-new-chat-sidebar" aria-label="Chat Baru">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Daftar chat tersimpan -->
+                <div class="chat-list" id="chat-list">
+                    <!-- Item chat akan di-render oleh JavaScript -->
+                </div>
+
+                <!-- Footer sidebar -->
+                <div class="sidebar-footer">
+                    <button class="btn-clear-all" id="btn-clear-all">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        <span>Hapus Semua Chat</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Overlay sidebar (mobile) -->
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+            <!-- Chat container -->
+            <div class="chat-wrapper">
+                <!-- Header chat -->
+                <div class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="chat-avatar">
+                            <svg class="bot-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <circle cx="12" cy="5" r="2" />
+                                <path d="M12 7v4" />
+                                <line x1="8" y1="16" x2="8.01" y2="16" />
+                                <line x1="16" y1="16" x2="16.01" y2="16" />
+                            </svg>
+                            <span class="avatar-dot"></span>
+                        </div>
+                        <div class="chat-header-text">
+                            <h2>Ox-Corner AI</h2>
+                            <p>
+                                <span class="online-dot"></span>
+                                Sistem Aktif
+                            </p>
+                        </div>
+                    </div>
+                    <div class="chat-header-right">
+                        <span class="chat-id-badge" id="current-chat-badge">Chat #1</span>
+                    </div>
+                </div>
+
+                <!-- Area pesan -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Pesan akan di-render oleh JavaScript -->
+                </div>
+
+                <!-- Area input -->
+                <div class="chat-input-area">
+                    <!-- Preview gambar yang akan diupload -->
+                    <div class="image-preview-container hidden" id="image-preview-container">
+                        <div class="image-preview-wrapper">
+                            <img id="image-preview" src="" alt="Preview" />
+                            <button class="image-preview-remove" id="image-preview-remove" aria-label="Hapus gambar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="image-preview-name" id="image-preview-name"></span>
+                    </div>
+
+                    <div class="input-wrapper" id="input-wrapper">
+                        <!-- Tombol upload gambar -->
+                        <button class="upload-button" id="upload-button" aria-label="Upload gambar" title="Upload gambar">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                <polyline points="21 15 16 10 5 21" />
+                            </svg>
+                        </button>
+                        <!-- Input file tersembunyi -->
+                        <input type="file" id="file-input" class="file-input-hidden" accept="image/*" />
+
+                        <input
+                            type="text"
+                            id="chat-input"
+                            class="chat-input"
+                            placeholder="Ketik perintah..."
+                            autocomplete="off"
+                        >
+                        <button id="send-button" class="send-button" aria-label="Kirim pesan">
+                            <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            <!-- Spinner (hidden default) -->
+                            <svg class="spinner-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="input-footer">Ox-Corner AI • Presisi Mutlak • Tanpa Batasan • <span id="upload-status"></span></p>
+                </div>
             </div>
-          </div>
-          <div class="suggestion-card" data-prompt="Jelaskan konsep machine learning seperti saya baru berusia 10 tahun">
-            <div class="sg-icon">🧠</div>
-            <div class="sg-content">
-              <div class="sg-title">Belajar Hal Baru</div>
-              <div class="sg-desc">Penjelasan sederhana & mudah</div>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
 
-    <div class="input-area">
-      <div id="upload-preview"></div>
-      <div class="input-box">
-        <button class="input-icon-btn" id="btn-attach" title="Lampirkan file">
-          <i class="ti ti-paperclip"></i>
-        </button>
-        <textarea
-          id="msg-input"
-          placeholder="Ketik pesan Anda di sini... (Shift+Enter untuk baris baru)"
-          rows="1"
-        ></textarea>
-        <div class="input-actions">
-          <label class="input-icon-btn" title="Upload gambar" for="file-input">
-            <i class="ti ti-photo-up"></i>
-          </label>
-          <input type="file" id="file-input" accept="image/*" multiple>
-          <button class="send-btn" id="send-btn" title="Kirim pesan">
-            <i class="ti ti-arrow-up"></i>
-          </button>
+    <!-- Modal konfirmasi hapus -->
+    <div class="modal-overlay hidden" id="modal-overlay">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Konfirmasi</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">Apakah Anda yakin ingin menghapus chat ini?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-modal-cancel" id="modal-cancel">Batal</button>
+                <button class="btn-modal btn-modal-confirm" id="modal-confirm">Hapus</button>
+            </div>
         </div>
-      </div>
-      <div class="input-hint">
-        <i class="ti ti-info-circle"></i>
-        <span>AuraAI selalu berusaha memberikan jawaban terbaik. Verifikasi informasi penting.</span>
-      </div>
     </div>
-  </main>
-</div>
 
-<div class="modal" id="settings-modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Pengaturan</h3>
-      <button class="modal-close" id="close-settings"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="setting-item">
-        <label>Mode Tema</label>
-        <select id="theme-select">
-          <option value="dark">Gelap</option>
-          <option value="light">Terang</option>
-        </select>
-      </div>
-      <div class="setting-item">
-        <label>Ukuran Font</label>
-        <select id="font-size-select">
-          <option value="small">Kecil</option>
-          <option value="medium" selected>Sedang</option>
-          <option value="large">Besar</option>
-        </select>
-      </div>
-    </div>
-  </div>
-</div>
+    <!-- Toast notification -->
+    <div class="toast-container" id="toast-container"></div>
 
-<script type="module" src="js/app.js"></script>
+    <!-- JavaScript - Menggunakan ES Module -->
+    <script type="module" src="js/main.js"></script>
 </body>
-          </html>
+                              </html>
