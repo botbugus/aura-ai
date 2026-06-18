@@ -17,7 +17,7 @@ export class DeepSeekAPI {
         this.isProcessing = true;
 
         try {
-            // Format payload sesuai dengan OpenAI API format (wire_api = "responses")
+            // Format payload sesuai dengan OpenAI API format
             const payload = {
                 model: this.model,
                 messages: [
@@ -25,10 +25,12 @@ export class DeepSeekAPI {
                     ...messages
                 ],
                 stream: false,
-                reasoning_effort: this.reasoningEffort || 'xhigh'
+                reasoning_effort: 'xhigh'
             };
 
-            // Gunakan endpoint /chat/completions (standar OpenAI)
+            console.log('🚀 Sending request to:', `${this.baseUrl}/chat/completions`);
+            console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
@@ -38,14 +40,27 @@ export class DeepSeekAPI {
                 body: JSON.stringify(payload)
             });
 
+            console.log('📡 Response status:', response.status);
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`API Error ${response.status}: ${errorData.error?.message || response.statusText}`);
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    console.error('❌ Error response:', errorData);
+                    errorMessage = errorData.error?.message || errorData.message || errorMessage;
+                } catch (e) {
+                    const text = await response.text();
+                    console.error('❌ Error text:', text);
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(`API Error: ${errorMessage}`);
             }
 
             const data = await response.json();
+            console.log('✅ Response data:', data);
             
             if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                console.error('❌ Invalid response structure:', data);
                 throw new Error('Respon API tidak valid: struktur data tidak sesuai.');
             }
 
@@ -53,15 +68,14 @@ export class DeepSeekAPI {
             return content;
 
         } catch (error) {
+            console.error('❌ API Error caught:', error);
             throw error;
         } finally {
             this.isProcessing = false;
         }
     }
 
-    // Metode untuk streaming (jika endpoint mendukung)
     async sendMessageStream(messages, onChunk) {
-        // Untuk sekarang menggunakan non-streaming karena endpoint mungkin tidak support streaming
         const content = await this.sendMessage(messages);
         if (onChunk) onChunk(content);
         return content;
