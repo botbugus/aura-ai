@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AuraAI — Asisten AI Cerdas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-sparkles"></i></div>
+        <span class="logo-name">AuraAI</span>
+      </div>
+      <button class="sidebar-toggle-mobile" id="sidebar-toggle">
+        <i class="ti ti-menu-2"></i>
+      </button>
+    </div>
+
+    <button class="btn-new-chat" id="btn-new-chat">
+      <i class="ti ti-plus"></i>
+      <span>Percakapan Baru</span>
+    </button>
+
+    <div class="sidebar-search">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Cari riwayat chat..." id="search-chats">
+    </div>
+
+    <div class="sidebar-content" id="sidebar-content">
+      <div class="section-label">Hari Ini</div>
+      <div id="chat-list-today" class="chat-list"></div>
+      
+      <div class="section-label">Kemarin</div>
+      <div id="chat-list-yesterday" class="chat-list"></div>
+      
+      <div class="section-label">Minggu Ini</div>
+      <div id="chat-list-week" class="chat-list"></div>
+      
+      <div class="section-label">Bulan Ini</div>
+      <div id="chat-list-month" class="chat-list"></div>
+    </div>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-footer">
+      <div class="footer-item" id="btn-settings">
+        <i class="ti ti-settings"></i>
+        <span>Pengaturan</span>
+      </div>
+      <div class="footer-item" id="btn-account">
+        <i class="ti ti-user-circle"></i>
+        <span>Akun Saya</span>
+      </div>
+      <div class="footer-item" id="btn-clear-all">
+        <i class="ti ti-trash"></i>
+        <span>Hapus Semua Chat</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn mobile-menu-btn" id="mobile-menu-btn">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <span class="topbar-title" id="chat-title">Percakapan Baru</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="btn-share" title="Bagikan">
+          <i class="ti ti-share"></i>
+        </button>
+        <button class="icon-btn" id="btn-export" title="Ekspor Chat">
+          <i class="ti ti-download"></i>
+        </button>
+        <button class="icon-btn" id="btn-more" title="Lainnya">
+          <i class="ti ti-dots-vertical"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chat-area">
+      <div class="welcome" id="welcome-screen">
+        <div class="welcome-icon">
+          <i class="ti ti-sparkles"></i>
+        </div>
+        <h1>Selamat Datang di AuraAI</h1>
+        <p class="welcome-subtitle">Asisten AI cerdas yang siap membantu Anda kapan saja</p>
+        
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon">✍️</div>
+            <div class="feature-title">Penulisan</div>
+            <div class="feature-desc">Konten & copywriting</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛠</div>
+            <div class="feature-title">Koding</div>
+            <div class="feature-desc">Debug & generate</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🌐</div>
+            <div class="feature-title">Bahasa</div>
+            <div class="feature-desc">Terjemahan akurat</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💡</div>
+            <div class="feature-title">Ide</div>
+            <div class="feature-desc">Brainstorming</div>
+          </div>
+        </div>
+
+        <p class="welcome-hint">Mulai dengan mengetik pesan di bawah atau pilih saran</p>
+        
+        <div class="suggestion-grid">
+          <div class="suggestion-card" data-prompt="Bantu saya menganalisis data penjualan dan berikan rekomendasi strategi">
+            <div class="sg-icon">📊</div>
+            <div class="sg-content">
+              <div class="sg-title">Analisis Data Bisnis</div>
+              <div class="sg-desc">Dapatkan insight dari data Anda</div>
+            </div>
+          </div>
+          <div class="suggestion-card" data-prompt="Tuliskan kode Python untuk mengotomatisasi laporan Excel">
+            <div class="sg-icon">🐍</div>
+            <div class="sg-content">
+              <div class="sg-title">Otomatisasi dengan Python</div>
+              <div class="sg-desc">Script untuk pekerjaan rutin</div>
+            </div>
+          </div>
+          <div class="suggestion-card" data-prompt="Buatkan rencana konten Instagram untuk bisnis fashion selama 1 bulan">
+            <div class="sg-icon">📱</div>
+            <div class="sg-content">
+              <div class="sg-title">Strategi Konten</div>
+              <div class="sg-desc">Rencana posting 30 hari</div>
+            </div>
+          </div>
+          <div class="suggestion-card" data-prompt="Jelaskan konsep machine learning seperti saya baru berusia 10 tahun">
+            <div class="sg-icon">🧠</div>
+            <div class="sg-content">
+              <div class="sg-title">Belajar Hal Baru</div>
+              <div class="sg-desc">Penjelasan sederhana & mudah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div id="upload-preview"></div>
+      <div class="input-box">
+        <button class="input-icon-btn" id="btn-attach" title="Lampirkan file">
+          <i class="ti ti-paperclip"></i>
+        </button>
+        <textarea
+          id="msg-input"
+          placeholder="Ketik pesan Anda di sini... (Shift+Enter untuk baris baru)"
+          rows="1"
+        ></textarea>
+        <div class="input-actions">
+          <label class="input-icon-btn" title="Upload gambar" for="file-input">
+            <i class="ti ti-photo-up"></i>
+          </label>
+          <input type="file" id="file-input" accept="image/*" multiple>
+          <button class="send-btn" id="send-btn" title="Kirim pesan">
+            <i class="ti ti-arrow-up"></i>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint">
+        <i class="ti ti-info-circle"></i>
+        <span>AuraAI selalu berusaha memberikan jawaban terbaik. Verifikasi informasi penting.</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="settings-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Pengaturan</h3>
+      <button class="modal-close" id="close-settings"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-item">
+        <label>Mode Tema</label>
+        <select id="theme-select">
+          <option value="dark">Gelap</option>
+          <option value="light">Terang</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <label>Ukuran Font</label>
+        <select id="font-size-select">
+          <option value="small">Kecil</option>
+          <option value="medium" selected>Sedang</option>
+          <option value="large">Besar</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+          </html>
