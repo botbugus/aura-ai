@@ -16,13 +16,9 @@ export class SidebarManager {
     }
 
     init() {
-        // Toggle sidebar (mobile)
         this.toggleBtn.addEventListener('click', () => this.toggle());
-        
-        // Overlay click (mobile)
         this.overlay.addEventListener('click', () => this.close());
 
-        // New chat buttons
         this.newChatSidebarBtn.addEventListener('click', () => {
             chatManager.createNewChat('Chat Baru');
             this.render();
@@ -35,7 +31,6 @@ export class SidebarManager {
             if (window.innerWidth <= 768) this.close();
         });
 
-        // Clear all chats
         this.clearAllBtn.addEventListener('click', () => {
             if (chatStorage.getAll().length === 0) {
                 this.showToast('Tidak ada chat untuk dihapus.', 'info');
@@ -48,7 +43,6 @@ export class SidebarManager {
             });
         });
 
-        // Resize handler
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
                 this.isOpen = true;
@@ -61,16 +55,13 @@ export class SidebarManager {
             }
         });
 
-        // Set initial state
         if (window.innerWidth <= 768) {
             this.isOpen = false;
             this.sidebar.classList.add('closed');
         }
 
-        // Render
         this.render();
 
-        // Listen to chat events
         chatManager.on('chatChanged', () => this.render());
         chatManager.on('newChatCreated', () => this.render());
         chatManager.on('chatDeleted', () => this.render());
@@ -100,12 +91,10 @@ export class SidebarManager {
         const chats = chatStorage.getChatsWithPreview();
         const currentId = chatManager.currentChatId;
 
-        // Hapus semua item kecuali yang ada di DOM sebagai template
         const items = this.chatList.querySelectorAll('.chat-item');
         items.forEach(item => item.remove());
 
         if (chats.length === 0) {
-            // Tampilkan empty state
             const emptyMsg = document.createElement('div');
             emptyMsg.className = 'chat-empty-state';
             emptyMsg.style.padding = '40px 20px';
@@ -123,7 +112,6 @@ export class SidebarManager {
             item.className = `chat-item${chat.id === currentId ? ' active' : ''}`;
             item.dataset.chatId = chat.id;
 
-            // Icon
             const icon = document.createElement('div');
             icon.className = 'chat-item-icon';
             icon.innerHTML = `
@@ -132,7 +120,6 @@ export class SidebarManager {
                 </svg>
             `;
 
-            // Content
             const content = document.createElement('div');
             content.className = 'chat-item-content';
             content.innerHTML = `
@@ -140,7 +127,6 @@ export class SidebarManager {
                 <span class="chat-item-preview">${chat.preview || 'Percakapan kosong'}</span>
             `;
 
-            // Delete button
             const delBtn = document.createElement('button');
             delBtn.className = 'chat-item-delete';
             delBtn.dataset.deleteId = chat.id;
@@ -160,7 +146,6 @@ export class SidebarManager {
             item.appendChild(content);
             item.appendChild(delBtn);
 
-            // Click handler
             item.addEventListener('click', () => {
                 chatManager.switchChat(chat.id);
                 this.render();
@@ -186,7 +171,6 @@ export class SidebarManager {
         );
     }
 
-    // Modal system
     showModal(title, message, onConfirm) {
         const overlay = document.getElementById('modal-overlay');
         const msgEl = document.getElementById('modal-message');
@@ -216,7 +200,6 @@ export class SidebarManager {
         confirmBtn.addEventListener('click', handleConfirm);
         cancelBtn.addEventListener('click', handleCancel);
 
-        // Click outside
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 cleanup();
@@ -224,9 +207,12 @@ export class SidebarManager {
         });
     }
 
-    // Toast system
     showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
+        if (!container) {
+            console.log(`[${type}] ${message}`);
+            return;
+        }
         
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
@@ -258,7 +244,6 @@ export class SidebarManager {
 
         container.appendChild(toast);
 
-        // Auto remove after 4 seconds
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.classList.add('removing');
@@ -266,4 +251,4 @@ export class SidebarManager {
             }
         }, 4000);
     }
-                                      }
+                }
