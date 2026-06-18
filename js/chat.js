@@ -7,8 +7,10 @@ export class ChatManager {
         this.isProcessing = false;
         this.messageQueue = [];
         this.listeners = {};
-        this.maxRetries = 2;
-        this.retryDelay = 1000;
+        this.maxRetries = 3;
+        this.retryDelay = 1500;
+        this.currentModel = 'gpt-5.5';
+        this.reasoningEffort = 'xhigh';
     }
 
     on(event, callback) {
@@ -28,6 +30,26 @@ export class ChatManager {
         }
     }
 
+    // Set model
+    setModel(modelName) {
+        if (deepseekAPI.setModel(modelName)) {
+            this.currentModel = modelName;
+            this.emit('modelChanged', modelName);
+            return true;
+        }
+        return false;
+    }
+
+    setReasoningEffort(level) {
+        const validLevels = ['low', 'medium', 'high', 'xhigh'];
+        if (validLevels.includes(level)) {
+            this.reasoningEffort = level;
+            this.emit('reasoningChanged', level);
+            return true;
+        }
+        return false;
+    }
+
     init() {
         try {
             const chats = chatStorage.getAll();
@@ -38,6 +60,8 @@ export class ChatManager {
                 this.currentChatId = chats[0].id;
             }
             this.emit('chatChanged', this.getCurrentChat());
+            this.emit('modelChanged', this.currentModel);
+            this.emit('reasoningChanged', this.reasoningEffort);
             return this.getCurrentChat();
         } catch (error) {
             console.error('❌ Init error:', error);
@@ -137,11 +161,15 @@ export class ChatManager {
 
     async sendMessageWithRetry(messages, retryCount = 0) {
         try {
-            return await deepseekAPI.sendMessage(messages);
+            return await deepseekAPI.sendMessage(messages, {
+                model: this.currentModel,
+                reasoningEffort: this.reasoningEffort
+            });
         } catch (error) {
             if (retryCount < this.maxRetries) {
-                console.log(`🔄 Retry ${retryCount + 1}/${this.maxRetries}...`);
-                await new Promise(resolve => setTimeout(resolve, this.retryDelay * (retryCount + 1)));
+                const delay = this.retryDelay * Math.pow(1.5, retryCount);
+                console.log(`🔄 Retry ${retryCount + 1}/${this.maxRetries} in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
                 return this.sendMessageWithRetry(messages, retryCount + 1);
             }
             throw error;
@@ -165,7 +193,6 @@ export class ChatManager {
             return;
         }
 
-        // Siapkan pesan user
         let userMessage = { 
             role: 'user', 
             content: content || '',
@@ -203,7 +230,6 @@ export class ChatManager {
                     content: m.content || '...'
                 }));
 
-            // Kirim dengan retry
             const response = await this.sendMessageWithRetry(apiMessages);
 
             const assistantMessage = {
