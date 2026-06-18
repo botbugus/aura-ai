@@ -1,0 +1,10 @@
+{
+  "name": "aura-ai",
+  "version": "1.0.0",
+  "description": "AuraAI - Asisten AI Cerdas",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  }
+}
