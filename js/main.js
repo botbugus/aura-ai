@@ -2,6 +2,7 @@ import { chatManager } from './chat.js';
 import { SidebarManager } from './sidebar.js';
 import { ImageUploadManager } from './image-upload.js';
 import { chatStorage } from './storage.js';
+import { deepseekAPI } from './api.js';
 
 class OxCornerApp {
     constructor() {
@@ -23,23 +24,19 @@ class OxCornerApp {
     init() {
         try {
             console.log('🚀 Initializing Ox-Corner AI...');
+            console.log('📋 Available models:', deepseekAPI.getModels());
 
-            // Inisialisasi sidebar manager
             this.sidebarManager = new SidebarManager();
-            
-            // Inisialisasi image upload manager
             this.imageUploadManager = new ImageUploadManager();
 
-            // Inisialisasi chat manager
             const chat = chatManager.init();
             if (!chat) {
                 throw new Error('Gagal menginisialisasi chat manager');
             }
 
-            // Render pesan awal
             this.renderMessages();
+            this.createModelSelector();
 
-            // Event listeners
             this.sendButton.addEventListener('click', () => this.handleSend());
             this.chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -48,7 +45,6 @@ class OxCornerApp {
                 }
             });
 
-            // Chat events
             chatManager.on('chatChanged', (chat) => {
                 try {
                     this.renderMessages();
@@ -103,12 +99,9 @@ class OxCornerApp {
                 this.showToast('Chat baru dibuat.', 'success');
             });
 
-            chatManager.on('chatDeleted', () => {
-                this.renderMessages();
-            });
-
-            chatManager.on('allChatsDeleted', () => {
-                this.renderMessages();
+            chatManager.on('modelChanged', (model) => {
+                console.log(`📦 Model changed to: ${model}`);
+                this.showToast(`Model: ${model}`, 'info');
             });
 
             this.chatInput.focus();
@@ -121,6 +114,89 @@ class OxCornerApp {
         } catch (error) {
             console.error('❌ Init error:', error);
             this.showToast('Gagal menginisialisasi aplikasi: ' + error.message, 'error');
+        }
+    }
+
+    createModelSelector() {
+        try {
+            const models = deepseekAPI.getModels();
+            const headerRight = document.querySelector('.chat-header-right');
+            
+            const selector = document.createElement('select');
+            selector.id = 'model-selector';
+            selector.style.cssText = `
+                background: rgba(0,0,0,0.3);
+                border: 1px solid var(--ox-border);
+                color: var(--ox-text);
+                padding: 4px 8px;
+                border-radius: 8px;
+                font-size: 0.7rem;
+                font-family: var(--font-sans);
+                cursor: pointer;
+                outline: none;
+                margin-right: 8px;
+            `;
+
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.id;
+                option.textContent = model.name;
+                if (model.id === 'gpt-5.5') {
+                    option.selected = true;
+                }
+                selector.appendChild(option);
+            });
+
+            selector.addEventListener('change', (e) => {
+                const model = e.target.value;
+                if (chatManager.setModel(model)) {
+                    this.showToast(`Model diubah ke: ${model}`, 'info');
+                } else {
+                    this.showToast(`Gagal mengubah model ke: ${model}`, 'error');
+                }
+            });
+
+            // Insert before badge
+            const badge = document.querySelector('.chat-id-badge');
+            headerRight.insertBefore(selector, badge);
+
+            // Reasoning effort selector
+            const effortSelector = document.createElement('select');
+            effortSelector.id = 'effort-selector';
+            effortSelector.style.cssText = `
+                background: rgba(0,0,0,0.3);
+                border: 1px solid var(--ox-border);
+                color: var(--ox-text);
+                padding: 4px 8px;
+                border-radius: 8px;
+                font-size: 0.7rem;
+                font-family: var(--font-sans);
+                cursor: pointer;
+                outline: none;
+            `;
+
+            const efforts = ['low', 'medium', 'high', 'xhigh'];
+            efforts.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                option.textContent = level.toUpperCase();
+                if (level === 'xhigh') {
+                    option.selected = true;
+                }
+                effortSelector.appendChild(option);
+            });
+
+            effortSelector.addEventListener('change', (e) => {
+                const level = e.target.value;
+                if (chatManager.setReasoningEffort(level)) {
+                    this.showToast(`Reasoning: ${level}`, 'info');
+                }
+            });
+
+            headerRight.insertBefore(effortSelector, badge);
+
+        } catch (error) {
+            console.error('❌ Create model selector error:', error);
         }
     }
 
@@ -369,7 +445,6 @@ class OxCornerApp {
     }
 }
 
-// Inisialisasi saat DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     try {
         window.app = new OxCornerApp();
