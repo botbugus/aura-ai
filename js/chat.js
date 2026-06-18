@@ -6,7 +6,7 @@ export class ChatManager {
         this.currentChatId = null;
         this.isProcessing = false;
         this.messageQueue = [];
-        this.listeners = [];
+        this.listeners = {};
     }
 
     // Event system
@@ -65,7 +65,6 @@ export class ChatManager {
     deleteChat(chatId) {
         const chats = chatStorage.getAll();
         if (chats.length <= 1) {
-            // Jika hanya satu chat, buat baru lalu hapus yang lama
             const newChat = this.createNewChat('Chat Baru');
             chatStorage.delete(chatId);
             this.currentChatId = newChat.id;
@@ -76,7 +75,6 @@ export class ChatManager {
 
         chatStorage.delete(chatId);
         
-        // Jika yang dihapus adalah chat aktif, pindah ke chat pertama
         if (this.currentChatId === chatId) {
             const remaining = chatStorage.getAll();
             if (remaining.length > 0) {
@@ -127,9 +125,9 @@ export class ChatManager {
         if (imageData) {
             userMessage.image = imageData;
             if (content) {
-                userMessage.content = `${content}\n[Gambar terlampir]`;
+                userMessage.content = `${content}\n[Gambar terlampir: ${imageData.name || 'image'}]`;
             } else {
-                userMessage.content = '[Gambar terlampir]';
+                userMessage.content = `[Gambar terlampir: ${imageData.name || 'image'}]`;
             }
         }
 
@@ -151,19 +149,13 @@ export class ChatManager {
         this.emit('processingStart');
 
         try {
-            // Siapkan history untuk API (tanpa image karena API tidak support gambar)
+            // Siapkan history untuk API
             const apiMessages = chat.messages
                 .filter(m => m.role !== 'system')
                 .map(m => ({
                     role: m.role,
                     content: m.content || '...'
                 }));
-
-            // Jika ada gambar, tambahkan indikator ke sistem
-            if (imageData) {
-                apiMessages[apiMessages.length - 1].content = 
-                    `${apiMessages[apiMessages.length - 1].content} [Gambar: ${imageData.name || 'image'}]`;
-            }
 
             const response = await deepseekAPI.sendMessage(apiMessages);
 
@@ -183,10 +175,9 @@ export class ChatManager {
         } catch (error) {
             console.error('API Error:', error);
             
-            // Tambahkan pesan error sebagai respon
             const errorMessage = {
                 role: 'assistant',
-                content: `⚠️ Error: ${error.message || 'Gagal terhubung ke API DeepSeek.'}`,
+                content: `⚠️ Error: ${error.message || 'Gagal terhubung ke API.'}`,
                 timestamp: Date.now(),
                 isError: true
             };
