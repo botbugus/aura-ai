@@ -7,9 +7,10 @@ export class ChatManager {
         this.isProcessing = false;
         this.messageQueue = [];
         this.listeners = {};
+        this.maxRetries = 2;
+        this.retryDelay = 1000;
     }
 
-    // Event system
     on(event, callback) {
         if (!this.listeners[event]) this.listeners[event] = [];
         this.listeners[event].push(callback);
@@ -17,25 +18,41 @@ export class ChatManager {
 
     emit(event, data) {
         if (this.listeners[event]) {
-            this.listeners[event].forEach(cb => cb(data));
+            this.listeners[event].forEach(cb => {
+                try {
+                    cb(data);
+                } catch (e) {
+                    console.error(`❌ Error in event ${event}:`, e);
+                }
+            });
         }
     }
 
-    // Initialize dengan chat pertama atau buat baru
     init() {
-        const chats = chatStorage.getAll();
-        if (chats.length === 0) {
-            const newChat = chatStorage.create('Chat Baru');
-            this.currentChatId = newChat.id;
-        } else {
-            this.currentChatId = chats[0].id;
+        try {
+            const chats = chatStorage.getAll();
+            if (chats.length === 0) {
+                const newChat = chatStorage.create('Chat Baru');
+                this.currentChatId = newChat.id;
+            } else {
+                this.currentChatId = chats[0].id;
+            }
+            this.emit('chatChanged', this.getCurrentChat());
+            return this.getCurrentChat();
+        } catch (error) {
+            console.error('❌ Init error:', error);
+            this.emit('error', 'Gagal menginisialisasi chat: ' + error.message);
+            return null;
         }
-        this.emit('chatChanged', this.getCurrentChat());
-        return this.getCurrentChat();
     }
 
     getCurrentChat() {
-        return chatStorage.getById(this.currentChatId);
+        try {
+            return chatStorage.getById(this.currentChatId);
+        } catch (error) {
+            console.error('❌ Get current chat error:', error);
+            return null;
+        }
     }
 
     getMessages() {
@@ -43,63 +60,97 @@ export class ChatManager {
         return chat ? chat.messages : [];
     }
 
-    // Buat chat baru
     createNewChat(title = 'Chat Baru') {
-        const newChat = chatStorage.create(title);
-        this.currentChatId = newChat.id;
-        this.emit('chatChanged', newChat);
-        this.emit('newChatCreated', newChat);
-        return newChat;
-    }
-
-    // Pindah ke chat lain
-    switchChat(chatId) {
-        const chat = chatStorage.getById(chatId);
-        if (!chat) return null;
-        this.currentChatId = chatId;
-        this.emit('chatChanged', chat);
-        return chat;
-    }
-
-    // Hapus chat
-    deleteChat(chatId) {
-        const chats = chatStorage.getAll();
-        if (chats.length <= 1) {
-            const newChat = this.createNewChat('Chat Baru');
-            chatStorage.delete(chatId);
+        try {
+            const newChat = chatStorage.create(title);
             this.currentChatId = newChat.id;
             this.emit('chatChanged', newChat);
-            this.emit('chatDeleted', chatId);
+            this.emit('newChatCreated', newChat);
             return newChat;
+        } catch (error) {
+            console.error('❌ Create chat error:', error);
+            this.emit('error', 'Gagal membuat chat baru: ' + error.message);
+            return null;
         }
+    }
 
-        chatStorage.delete(chatId);
-        
-        if (this.currentChatId === chatId) {
-            const remaining = chatStorage.getAll();
-            if (remaining.length > 0) {
-                this.currentChatId = remaining[0].id;
-                this.emit('chatChanged', remaining[0]);
+    switchChat(chatId) {
+        try {
+            const chat = chatStorage.getById(chatId);
+            if (!chat) {
+                throw new Error('Chat tidak ditemukan');
             }
+            this.currentChatId = chatId;
+            this.emit('chatChanged', chat);
+            return chat;
+        } catch (error) {
+            console.error('❌ Switch chat error:', error);
+            this.emit('error', 'Gagal beralih chat: ' + error.message);
+            return null;
         }
-        this.emit('chatDeleted', chatId);
-        return this.getCurrentChat();
     }
 
-    // Hapus semua chat
+    deleteChat(chatId) {
+        try {
+            const chats = chatStorage.getAll();
+            if (chats.length <= 1) {
+                const newChat = this.createNewChat('Chat Baru');
+                chatStorage.delete(chatId);
+                this.currentChatId = newChat.id;
+                this.emit('chatChanged', newChat);
+                this.emit('chatDeleted', chatId);
+                return newChat;
+            }
+
+            chatStorage.delete(chatId);
+            
+            if (this.currentChatId === chatId) {
+                const remaining = chatStorage.getAll();
+                if (remaining.length > 0) {
+                    this.currentChatId = remaining[0].id;
+                    this.emit('chatChanged', remaining[0]);
+                }
+            }
+            this.emit('chatDeleted', chatId);
+            return this.getCurrentChat();
+        } catch (error) {
+            console.error('❌ Delete chat error:', error);
+            this.emit('error', 'Gagal menghapus chat: ' + error.message);
+            return null;
+        }
+    }
+
     deleteAllChats() {
-        chatStorage.deleteAll();
-        const newChat = chatStorage.create('Chat Baru');
-        this.currentChatId = newChat.id;
-        this.emit('chatChanged', newChat);
-        this.emit('allChatsDeleted');
-        return newChat;
+        try {
+            chatStorage.deleteAll();
+            const newChat = chatStorage.create('Chat Baru');
+            this.currentChatId = newChat.id;
+            this.emit('chatChanged', newChat);
+            this.emit('allChatsDeleted');
+            return newChat;
+        } catch (error) {
+            console.error('❌ Delete all chats error:', error);
+            this.emit('error', 'Gagal menghapus semua chat: ' + error.message);
+            return null;
+        }
     }
 
-    // Kirim pesan
+    async sendMessageWithRetry(messages, retryCount = 0) {
+        try {
+            return await deepseekAPI.sendMessage(messages);
+        } catch (error) {
+            if (retryCount < this.maxRetries) {
+                console.log(`🔄 Retry ${retryCount + 1}/${this.maxRetries}...`);
+                await new Promise(resolve => setTimeout(resolve, this.retryDelay * (retryCount + 1)));
+                return this.sendMessageWithRetry(messages, retryCount + 1);
+            }
+            throw error;
+        }
+    }
+
     async sendMessage(content, imageData = null) {
         if (this.isProcessing) {
-            this.emit('error', 'Sistem sedang memproses permintaan sebelumnya.');
+            this.emit('error', 'Sistem sedang memproses permintaan sebelumnya. Mohon tunggu.');
             return;
         }
 
@@ -110,7 +161,7 @@ export class ChatManager {
 
         const chat = this.getCurrentChat();
         if (!chat) {
-            this.emit('error', 'Tidak ada chat yang aktif.');
+            this.emit('error', 'Tidak ada chat yang aktif. Buat chat baru terlebih dahulu.');
             return;
         }
 
@@ -121,7 +172,6 @@ export class ChatManager {
             timestamp: Date.now()
         };
 
-        // Jika ada gambar, tambahkan ke content
         if (imageData) {
             userMessage.image = imageData;
             if (content) {
@@ -131,25 +181,21 @@ export class ChatManager {
             }
         }
 
-        // Tambahkan ke chat
-        chat.messages.push(userMessage);
-        chatStorage.update(chat.id, chat.messages);
-        this.emit('messageSent', userMessage);
-
-        // Update title chat jika ini pesan pertama dari user
-        if (chat.messages.filter(m => m.role === 'user').length === 1 && content) {
-            const newTitle = content.substring(0, 40) + (content.length > 40 ? '...' : '');
-            chat.title = newTitle;
-            chatStorage.update(chat.id, chat.messages, newTitle);
-            this.emit('chatUpdated', chat);
-        }
-
-        // Proses dengan AI
-        this.isProcessing = true;
-        this.emit('processingStart');
-
         try {
-            // Siapkan history untuk API
+            chat.messages.push(userMessage);
+            chatStorage.update(chat.id, chat.messages);
+            this.emit('messageSent', userMessage);
+
+            if (chat.messages.filter(m => m.role === 'user').length === 1 && content) {
+                const newTitle = content.substring(0, 40) + (content.length > 40 ? '...' : '');
+                chat.title = newTitle;
+                chatStorage.update(chat.id, chat.messages, newTitle);
+                this.emit('chatUpdated', chat);
+            }
+
+            this.isProcessing = true;
+            this.emit('processingStart');
+
             const apiMessages = chat.messages
                 .filter(m => m.role !== 'system')
                 .map(m => ({
@@ -157,9 +203,9 @@ export class ChatManager {
                     content: m.content || '...'
                 }));
 
-            const response = await deepseekAPI.sendMessage(apiMessages);
+            // Kirim dengan retry
+            const response = await this.sendMessageWithRetry(apiMessages);
 
-            // Tambahkan respon assistant
             const assistantMessage = {
                 role: 'assistant',
                 content: response,
@@ -169,15 +215,14 @@ export class ChatManager {
             chat.messages.push(assistantMessage);
             chatStorage.update(chat.id, chat.messages);
             this.emit('messageReceived', assistantMessage);
-
             return assistantMessage;
 
         } catch (error) {
-            console.error('API Error:', error);
+            console.error('❌ Send message error:', error);
             
             const errorMessage = {
                 role: 'assistant',
-                content: `⚠️ Error: ${error.message || 'Gagal terhubung ke API.'}`,
+                content: `⚠️ Error: ${error.message || 'Gagal mengirim pesan. Periksa koneksi dan API key.'}`,
                 timestamp: Date.now(),
                 isError: true
             };
@@ -185,7 +230,7 @@ export class ChatManager {
             chat.messages.push(errorMessage);
             chatStorage.update(chat.id, chat.messages);
             this.emit('messageReceived', errorMessage);
-            this.emit('error', error.message);
+            this.emit('error', error.message || 'Gagal mengirim pesan');
 
             return errorMessage;
 
@@ -195,10 +240,13 @@ export class ChatManager {
         }
     }
 
-    // Format timestamp
     formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        try {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        } catch {
+            return '--:--';
+        }
     }
 }
 
