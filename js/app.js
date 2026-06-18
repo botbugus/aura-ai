@@ -1,3 +1,4 @@
+// ─── AuraAI Application Entry Point ──────────────────────────────────────────
 import { ParticleSystem } from './particles.js';
 import { ChatManager } from './chat.js';
 
@@ -7,22 +8,28 @@ class AuraAIApp {
     this.chatManager = null;
   }
 
-  async init() {
+  init() {
+    console.log('🚀 AuraAI starting...');
+    
+    // Initialize particle background
     this.particleSystem = new ParticleSystem('particle-canvas');
+    
+    // Initialize chat manager AFTER DOM is ready
     this.chatManager = new ChatManager();
     
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
-    mediaQuery.addEventListener('change', (e) => {
-      if (!e.matches) {
-        document.getElementById('sidebar')?.classList.remove('open');
-        document.getElementById('sidebar-overlay')?.classList.remove('show');
-      }
-    });
-    
-    console.log('%c🌟 AuraAI %cinitialized', 'color: #a78bfa; font-size: 16px;', 'color: #888;');
+    console.log('%c✅ AuraAI %cready', 'color: #a78bfa; font-size: 14px;', 'color: #888;');
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => new AuraAIApp().init());
+// Wait for DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const app = new AuraAIApp();
+    app.init();
+  });
+} else {
+  const app = new AuraAIApp();
+  app.init();
+}
 
 export default AuraAIApp;
