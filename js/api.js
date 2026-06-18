@@ -5,31 +5,47 @@ export class DeepSeekAPI {
         this.apiKey = API_CONFIG.apiKey;
         this.baseUrl = API_CONFIG.baseUrl;
         this.model = API_CONFIG.model;
+        this.availableModels = API_CONFIG.availableModels;
         this.systemPrompt = API_CONFIG.systemPrompt;
         this.isProcessing = false;
     }
 
-    async sendMessage(messages, onChunk = null) {
+    // Ganti model
+    setModel(modelName) {
+        if (this.availableModels[modelName]) {
+            this.model = modelName;
+            console.log(`🔄 Model changed to: ${modelName}`);
+            return true;
+        }
+        console.error(`❌ Model "${modelName}" not found`);
+        return false;
+    }
+
+    async sendMessage(messages, options = {}) {
         if (this.isProcessing) {
             throw new Error('Sistem sedang memproses permintaan sebelumnya.');
         }
 
         this.isProcessing = true;
 
+        const modelToUse = options.model || this.model;
+        const reasoningEffort = options.reasoningEffort || 'xhigh';
+
         try {
-            // Format payload sesuai dengan OpenAI API format
             const payload = {
-                model: this.model,
+                model: modelToUse,
                 messages: [
                     { role: 'system', content: this.systemPrompt },
                     ...messages
                 ],
                 stream: false,
-                reasoning_effort: 'xhigh'
+                store: false,
+                reasoning_effort: reasoningEffort
             };
 
             console.log('🚀 Sending request to:', `${this.baseUrl}/chat/completions`);
-            console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+            console.log('📦 Model:', modelToUse);
+            console.log('📦 Reasoning:', reasoningEffort);
 
             const response = await fetch(`${this.baseUrl}/chat/completions`, {
                 method: 'POST',
@@ -47,7 +63,7 @@ export class DeepSeekAPI {
                 try {
                     const errorData = await response.json();
                     console.error('❌ Error response:', errorData);
-                    errorMessage = errorData.error?.message || errorData.message || errorMessage;
+                    errorMessage = errorData.error?.message || errorData.message || JSON.stringify(errorData);
                 } catch (e) {
                     const text = await response.text();
                     console.error('❌ Error text:', text);
@@ -57,7 +73,7 @@ export class DeepSeekAPI {
             }
 
             const data = await response.json();
-            console.log('✅ Response data:', data);
+            console.log('✅ Response received');
             
             if (!data.choices || !data.choices[0] || !data.choices[0].message) {
                 console.error('❌ Invalid response structure:', data);
@@ -65,6 +81,12 @@ export class DeepSeekAPI {
             }
 
             const content = data.choices[0].message.content;
+            
+            // Track usage jika ada
+            if (data.usage) {
+                console.log('📊 Token usage:', data.usage);
+            }
+            
             return content;
 
         } catch (error) {
@@ -75,10 +97,25 @@ export class DeepSeekAPI {
         }
     }
 
-    async sendMessageStream(messages, onChunk) {
-        const content = await this.sendMessage(messages);
+    async sendMessageStream(messages, onChunk, options = {}) {
+        const content = await this.sendMessage(messages, options);
         if (onChunk) onChunk(content);
         return content;
+    }
+
+    // Validasi model
+    isValidModel(modelName) {
+        return !!this.availableModels[modelName];
+    }
+
+    // Dapatkan daftar model
+    getModels() {
+        return Object.keys(this.availableModels).map(key => ({
+            id: key,
+            name: this.availableModels[key].name,
+            context: this.availableModels[key].context,
+            output: this.availableModels[key].output
+        }));
     }
 }
 
