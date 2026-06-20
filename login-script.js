@@ -1,4 +1,6 @@
 const ADMIN_SECRET_CODE = 'admin123';
+const ADMIN_EMAILS = ['admin@xyz.com'];
+const ADMIN_USERNAME_PREFIX = 'admin';
 
 document.querySelectorAll('.auth-form').forEach(form => {
     form.addEventListener('submit', (e) => e.preventDefault());
@@ -32,12 +34,12 @@ function togglePassword(inputId, icon) {
 
 document.getElementById('login-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('login-email').value;
+    const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
     
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-            const isAdmin = ADMIN_EMAILS.includes(userCredential.user.email);
+            const isAdmin = checkIsAdmin(userCredential.user.email);
             window.location.href = isAdmin ? 'admin/index.html' : 'user/index.html';
         })
         .catch((error) => {
@@ -47,7 +49,7 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
 
 document.getElementById('register-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('register-email').value;
+    const email = document.getElementById('register-email').value.trim();
     const password = document.getElementById('register-password').value;
     const confirm = document.getElementById('register-confirm').value;
     const role = document.querySelector('input[name="role"]:checked').value;
@@ -64,18 +66,23 @@ document.getElementById('register-form').addEventListener('submit', function(e) 
     }
     
     if (role === 'admin' && adminCode !== ADMIN_SECRET_CODE) {
-        showToast('Kode admin tidak valid', 'error');
+        showToast('Kode admin tidak valid. Gunakan kode: ' + ADMIN_SECRET_CODE, 'error');
+        return;
+    }
+    
+    if (role === 'admin' && !email.split('@')[0].toLowerCase().startsWith(ADMIN_USERNAME_PREFIX)) {
+        showToast('Username admin harus diawali dengan "admin" (contoh: admin@xyz.com, admin123@xyz.com)', 'error');
         return;
     }
     
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             const uid = userCredential.user.uid;
-            const finalEmail = role === 'admin' ? 'admin-' + email : email;
+            const userRole = checkIsAdmin(email) ? 'admin' : 'user';
             
             return db.ref('users/' + uid).set({
                 email: email,
-                role: role,
+                role: userRole,
                 links: {},
                 social: {},
                 profile: {
@@ -88,7 +95,7 @@ document.getElementById('register-form').addEventListener('submit', function(e) 
             });
         })
         .then(() => {
-            showToast('Akun berhasil dibuat', 'success');
+            showToast('Akun berhasil dibuat sebagai ' + (checkIsAdmin(email) ? 'Admin' : 'User'), 'success');
             setTimeout(() => switchForm('login'), 1500);
         })
         .catch((error) => {
@@ -98,7 +105,7 @@ document.getElementById('register-form').addEventListener('submit', function(e) 
 
 document.getElementById('forgot-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const email = document.getElementById('reset-email').value;
+    const email = document.getElementById('reset-email').value.trim();
     
     auth.sendPasswordResetEmail(email)
         .then(() => {
@@ -109,6 +116,13 @@ document.getElementById('forgot-form').addEventListener('submit', function(e) {
             showToast(error.message, 'error');
         });
 });
+
+function checkIsAdmin(email) {
+    if (!email) return false;
+    if (ADMIN_EMAILS.includes(email)) return true;
+    const username = email.split('@')[0].toLowerCase();
+    return username.startsWith(ADMIN_USERNAME_PREFIX);
+}
 
 function showToast(message, type) {
     const existing = document.querySelector('.toast');
