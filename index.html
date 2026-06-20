@@ -3,217 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ox-Corner AI</title>
-    <meta name="description" content="Ox-Corner AI - Presisi Mutlak. Tanpa Batasan.">
-
-    <!-- Google Fonts: Inter + JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <title>LinkTree - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Canvas untuk partikel -->
-    <canvas id="particle-canvas" aria-hidden="true"></canvas>
-
-    <!-- Gradient orbs dekoratif -->
-    <div class="gradient-orb orb-left"></div>
-    <div class="gradient-orb orb-right"></div>
-
-    <!-- Container utama -->
-    <div class="app-container">
-        <!-- Navbar -->
-        <nav class="navbar" id="navbar">
-            <div class="navbar-brand">
-                <!-- Tombol toggle sidebar (mobile) -->
-                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
-                </button>
-                <div class="brand-icon">
-                    <svg class="cpu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="4" width="16" height="16" rx="2" />
-                        <rect x="9" y="9" width="6" height="6" />
-                        <line x1="9" y1="1" x2="9" y2="4" />
-                        <line x1="15" y1="1" x2="15" y2="4" />
-                        <line x1="9" y1="20" x2="9" y2="23" />
-                        <line x1="15" y1="20" x2="15" y2="23" />
-                        <line x1="20" y1="9" x2="23" y2="9" />
-                        <line x1="20" y1="14" x2="23" y2="14" />
-                        <line x1="1" y1="9" x2="4" y2="9" />
-                        <line x1="1" y1="14" x2="4" y2="14" />
-                    </svg>
-                    <span class="pulse-dot"></span>
-                </div>
-                <div class="brand-text">
-                    <h1 class="brand-name">Ox-Corner<span class="brand-ai">AI</span></h1>
-                </div>
+    <div id="app">
+        <!-- Area Home - Tengah -->
+        <div id="home-section" class="main-section">
+            <div id="links-container">
+                <h2>Tautan Anda</h2>
+                <div id="user-links"></div>
+                <button onclick="showAddLinkForm()">+ Tambah Tautan</button>
             </div>
-            <div class="navbar-actions">
-                <!-- Tombol New Chat (desktop) -->
-                <button class="btn-new-chat" id="btn-new-chat-nav" aria-label="New Chat">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    <span class="btn-new-chat-text">New Chat</span>
-                </button>
-                <div class="navbar-status">
-                    <div class="status-indicator">
-                        <svg class="activity-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                        </svg>
-                        <span class="status-text">Sistem Normal</span>
-                    </div>
-                    <div class="clock" id="clock">--:--:--</div>
-                </div>
-            </div>
-        </nav>
-
-        <!-- Layout utama: Sidebar + Chat -->
-        <div class="main-layout">
-            <!-- Sidebar - Riwayat Chat -->
-            <aside class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <h3 class="sidebar-title">Riwayat Percakapan</h3>
-                    <button class="btn-new-chat-sidebar" id="btn-new-chat-sidebar" aria-label="Chat Baru">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19" />
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Daftar chat tersimpan -->
-                <div class="chat-list" id="chat-list">
-                    <!-- Item chat akan di-render oleh JavaScript -->
-                </div>
-
-                <!-- Footer sidebar -->
-                <div class="sidebar-footer">
-                    <button class="btn-clear-all" id="btn-clear-all">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                        <span>Hapus Semua Chat</span>
-                    </button>
-                </div>
-            </aside>
-
-            <!-- Overlay sidebar (mobile) -->
-            <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-            <!-- Chat container -->
-            <div class="chat-wrapper">
-                <!-- Header chat -->
-                <div class="chat-header">
-                    <div class="chat-header-left">
-                        <div class="chat-avatar">
-                            <svg class="bot-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="11" width="18" height="11" rx="2" />
-                                <circle cx="12" cy="5" r="2" />
-                                <path d="M12 7v4" />
-                                <line x1="8" y1="16" x2="8.01" y2="16" />
-                                <line x1="16" y1="16" x2="16.01" y2="16" />
-                            </svg>
-                            <span class="avatar-dot"></span>
-                        </div>
-                        <div class="chat-header-text">
-                            <h2>Ox-Corner AI</h2>
-                            <p>
-                                <span class="online-dot"></span>
-                                Sistem Aktif
-                            </p>
-                        </div>
-                    </div>
-                    <div class="chat-header-right">
-                        <span class="chat-id-badge" id="current-chat-badge">Chat #1</span>
-                    </div>
-                </div>
-
-                <!-- Area pesan -->
-                <div class="chat-messages" id="chat-messages">
-                    <!-- Pesan akan di-render oleh JavaScript -->
-                </div>
-
-                <!-- Area input -->
-                <div class="chat-input-area">
-                    <!-- Preview gambar yang akan diupload -->
-                    <div class="image-preview-container hidden" id="image-preview-container">
-                        <div class="image-preview-wrapper">
-                            <img id="image-preview" src="" alt="Preview" />
-                            <button class="image-preview-remove" id="image-preview-remove" aria-label="Hapus gambar">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="18" y1="6" x2="6" y2="18" />
-                                    <line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                            </button>
-                        </div>
-                        <span class="image-preview-name" id="image-preview-name"></span>
-                    </div>
-
-                    <div class="input-wrapper" id="input-wrapper">
-                        <!-- Tombol upload gambar -->
-                        <button class="upload-button" id="upload-button" aria-label="Upload gambar" title="Upload gambar">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <polyline points="21 15 16 10 5 21" />
-                            </svg>
-                        </button>
-                        <!-- Input file tersembunyi -->
-                        <input type="file" id="file-input" class="file-input-hidden" accept="image/*" />
-
-                        <input
-                            type="text"
-                            id="chat-input"
-                            class="chat-input"
-                            placeholder="Ketik perintah..."
-                            autocomplete="off"
-                        >
-                        <button id="send-button" class="send-button" aria-label="Kirim pesan">
-                            <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="22" y1="2" x2="11" y2="13" />
-                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                            </svg>
-                            <!-- Spinner (hidden default) -->
-                            <svg class="spinner-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10" stroke-dasharray="31.4 31.4" />
-                            </svg>
-                        </button>
-                    </div>
-                    <p class="input-footer">Ox-Corner AI • Presisi Mutlak • Tanpa Batasan • <span id="upload-status"></span></p>
-                </div>
+            <div id="add-link-form" style="display: none;">
+                <input type="text" id="link-title" placeholder="Judul Tautan">
+                <input type="url" id="link-url" placeholder="URL Tautan">
+                <input type="text" id="link-icon" placeholder="Icon (emoji/kelas FontAwesome)">
+                <button onclick="addLink()">Simpan</button>
+                <button onclick="cancelAddLink()">Batal</button>
             </div>
         </div>
-    </div>
 
-    <!-- Modal konfirmasi hapus -->
-    <div class="modal-overlay hidden" id="modal-overlay">
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h3>Konfirmasi</h3>
-            </div>
-            <div class="modal-body">
-                <p id="modal-message">Apakah Anda yakin ingin menghapus chat ini?</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-modal btn-modal-cancel" id="modal-cancel">Batal</button>
-                <button class="btn-modal btn-modal-confirm" id="modal-confirm">Hapus</button>
-            </div>
+        <!-- Area Beranda - Kiri Bawah (Preview Publik) -->
+        <div id="beranda-section" class="bottom-left-section" style="display: none;">
+            <h3>Pratinjau Halaman Publik</h3>
+            <div id="public-preview"></div>
+            <button onclick="closeBeranda()">Tutup</button>
         </div>
+
+        <!-- Area Profil - Bawah -->
+        <div id="profile-section" class="bottom-section">
+            <h3>Pengaturan Profil</h3>
+            <input type="text" id="display-name" placeholder="Nama Tampilan">
+            <textarea id="bio" placeholder="Bio singkat"></textarea>
+            <input type="url" id="photo-url" placeholder="URL Foto Profil">
+            <button onclick="saveProfile()">Simpan Profil</button>
+            <button onclick="logout()">Keluar</button>
+        </div>
+
+        <!-- Navigasi Sosial Media -->
+        <div id="social-media-section" class="social-section">
+            <h3>Media Sosial</h3>
+            <div id="social-links"></div>
+            <button onclick="showAddSocialForm()">+ Tambah Media Sosial</button>
+        </div>
+
+        <!-- Tombol Tampil Beranda -->
+        <button id="toggle-beranda" class="beranda-toggle" onclick="toggleBeranda()">Beranda</button>
     </div>
 
-    <!-- Toast notification -->
-    <div class="toast-container" id="toast-container"></div>
-
-    <!-- JavaScript - Menggunakan ES Module -->
-    <script type="module" src="js/main.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
 </body>
-                              </html>
+</html>
