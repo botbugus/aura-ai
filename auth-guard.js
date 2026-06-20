@@ -1,12 +1,12 @@
 (function() {
-    const ADMIN_PREFIX = 'admin';
+    const ADMIN_USERNAME_PREFIX = 'admin';
     const ADMIN_EMAILS = ['admin@xyz.com'];
 
     function isAdmin(email) {
         if (!email) return false;
         if (ADMIN_EMAILS.includes(email)) return true;
         const username = email.split('@')[0].toLowerCase();
-        return username.startsWith(ADMIN_PREFIX);
+        return username.startsWith(ADMIN_USERNAME_PREFIX);
     }
 
     auth.onAuthStateChanged((user) => {
@@ -23,10 +23,6 @@
         const isAdminPath = currentPath.includes('/admin/');
         const isUserPath = currentPath.includes('/user/');
 
-        // Update role di database setiap login
-        db.ref('users/' + user.uid + '/role').set(adminStatus ? 'admin' : 'user');
-        db.ref('users/' + user.uid + '/email').set(user.email);
-
         if (isLoginPath) {
             window.location.href = adminStatus ? 'admin/index.html' : 'user/index.html';
             return;
@@ -34,16 +30,15 @@
 
         if (adminStatus && isUserPath) {
             window.location.href = '../admin/index.html';
-        } else if (!adminStatus && isAdminPath) {
+            return;
+        }
+        if (!adminStatus && isAdminPath) {
             window.location.href = '../user/index.html';
+            return;
         }
 
         window.currentUser = user;
         window.isAdminUser = adminStatus;
-        window.ADMIN_PREFIX = ADMIN_PREFIX;
-        window.ADMIN_EMAILS_LIST = ADMIN_EMAILS;
-        window.dispatchEvent(new CustomEvent('authReady', { 
-            detail: { user, isAdmin: adminStatus } 
-        }));
+        window.dispatchEvent(new CustomEvent('authReady', { detail: { user, isAdmin: adminStatus } }));
     });
 })();
