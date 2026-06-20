@@ -1,14 +1,29 @@
 let allUsers = {};
-let adminEmails = ['admin@admin.com'];
+let adminEmails = ['admin@xyz.com'];
+const ADMIN_USERNAME_PREFIX = 'admin';
 
 window.addEventListener('authReady', () => {
     if (!window.isAdminUser) {
         window.location.href = '../user/index.html';
         return;
     }
+    loadAdminEmails();
     loadAdminData();
     setupNavigation();
 });
+
+function loadAdminEmails() {
+    db.ref('adminSettings/adminEmails').once('value').then(snapshot => {
+        const saved = snapshot.val();
+        if (saved) {
+            adminEmails = saved;
+        }
+    });
+}
+
+function saveAdminEmails() {
+    db.ref('adminSettings/adminEmails').set(adminEmails);
+}
 
 function setupNavigation() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -30,6 +45,7 @@ function loadAdminData() {
         updateStats();
         renderUsersTable();
         renderLinksTable();
+        renderAdminEmailList();
     });
     
     if (window.currentUser) {
@@ -74,24 +90,27 @@ function renderUsersTable(filter = '') {
     
     tbody.innerHTML = users.map(([uid, data]) => {
         const date = data.createdAt ? new Date(data.createdAt).toLocaleDateString('id-ID') : '-';
+        const isAdmin = checkIsAdmin(data.email);
         return `
             <tr>
-                <td>${data.email}</td>
+                <td>${data.email} ${isAdmin ? '<i class="fas fa-crown" style="color:#f59e0b;"></i>' : ''}</td>
                 <td><span class="badge badge-${data.role || 'user'}">${data.role || 'user'}</span></td>
                 <td>${Object.keys(data.links || {}).length}</td>
                 <td>${date}</td>
                 <td>
-                    <button class="btn-danger btn-sm" onclick="deleteUser('${uid}')">
+                    ${!isAdmin || data.email !== window.currentUser.email ? `
+                    <button class="btn-danger btn-sm" onclick="deleteUser('${uid}', '${data.email}')">
                         <i class="fas fa-trash"></i>
                     </button>
+                    ` : ''}
                 </td>
             </tr>
         `;
     }).join('');
     
-    document.getElementById('user-search').addEventListener('input', function(e) {
+    document.getElementById('user-search').oninput = function(e) {
         renderUsersTable(e.target.value);
-    });
+    };
 }
 
 function renderLinksTable() {
@@ -107,7 +126,7 @@ function renderLinksTable() {
     tbody.innerHTML = allLinks.map(link => `
         <tr>
             <td>${link.email}</td>
-            <td>${link.title}</td>
+            <td>${link.icon || '🔗'} ${link.title}</td>
             <td><a href="${link.url}" target="_blank" style="color:#7c83ff;">${link.url.substring(0, 40)}...</a></td>
             <td>
                 <button class="btn-danger btn-sm" onclick="deleteUserLink('${link.uid}', '${link.linkId}')">
@@ -118,35 +137,105 @@ function renderLinksTable() {
     `).join('');
 }
 
-function deleteUser(uid) {
-    if (confirm('Hapus pengguna ini? Semua data akan hilang permanen.')) {
-        db.ref('users/' + uid).remove().then(() => loadAdminData());
+function renderAdminEmailList() {
+    const existingList = document.getElementById('admin-email-list');
+    if (!existingList) return;
+    
+    existingList.innerHTML = adminEmails.map(email => `
+        <div class="admin-email-item">
+            <span>${email}</span>
+            <button class="btn-danger btn-sm" onclick="removeAdminEmail('${email}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function deleteUser(uid, email) {
+    if (checkIsAdmin(email)) {
+        showToast('Tidak dapat menghapus akun admin lain', 'error');
+        return;
+    }
+    
+    if (confirm(`Hapus pengguna ${email}? Semua data akan hilang permanen.`)) {
+        db.ref('users/' + uid).remove().then(() => {
+            loadAdminData();
+            showToast('Pengguna dihapus', 'success');
+        });
     }
 }
 
 function deleteUserLink(uid, linkId) {
-    db.ref('users/' + uid + '/links/' + linkId).remove().then(() => loadAdminData());
+    if (confirm('Hapus tautan ini?')) {
+        db.ref('users/' + uid + '/links/' + linkId).remove().then(() => {
+            loadAdminData();
+            showToast('Tautan dihapus', 'success');
+        });
+    }
 }
 
 function addAdminEmail() {
-    const email = document.getElementById('new-admin-email').value;
-    if (email && !adminEmails.includes(email)) {
-        adminEmails.push(email);
-        document.getElementById('new-admin-email').value = '';
-        showToast('Email admin ditambahkan', 'success');
+    const emailInput = document.getElementById('new-admin-email');
+    const email = emailInput.value.trim();
+    
+    if (!email) {
+        showToast('Masukkan email yang valid', 'error');
+        return;
     }
+    
+    if (adminEmails.includes(email)) {
+        showToast('Email sudah terdaftar sebagai admin', 'error');
+        return;
+    }
+    
+    const username = email.split('@')[0].toLowerCase();
+    if (!username.startsWith(ADMIN_USERNAME_PREFIX)) {
+        showToast('Email admin harus diawali dengan "admin" (contoh: admin@xyz.com)', 'error');
+        return;
+    }
+    
+    adminEmails.push(email);
+    saveAdminEmails();
+    emailInput.value = '';
+    renderAdminEmailList();
+    loadAdminData();
+    showToast('Email admin ditambahkan', 'success');
+}
+
+function removeAdminEmail(email) {
+    if (email === window.currentUser.email) {
+        showToast('Tidak dapat menghapus diri sendiri', 'error');
+        return;
+    }
+    
+    adminEmails = adminEmails.filter(e => e !== email);
+    saveAdminEmails();
+    renderAdminEmailList();
+    loadAdminData();
+    showToast('Email admin dihapus', 'success');
 }
 
 function deleteAllUsers() {
-    if (confirm('PERINGATAN: Hapus SEMUA data pengguna? Tindakan ini tidak dapat dibatalkan.')) {
-        const secondConfirm = confirm('Ketik YA untuk konfirmasi:');
-        if (secondConfirm) {
-            db.ref('users').remove().then(() => {
-                loadAdminData();
-                showToast('Semua data pengguna dihapus', 'success');
-            });
-        }
+    if (confirm('PERINGATAN: Ini akan menghapus SEMUA data pengguna non-admin. Lanjutkan?')) {
+        const promises = [];
+        Object.entries(allUsers).forEach(([uid, data]) => {
+            if (!checkIsAdmin(data.email)) {
+                promises.push(db.ref('users/' + uid).remove());
+            }
+        });
+        
+        Promise.all(promises).then(() => {
+            loadAdminData();
+            showToast('Semua pengguna non-admin dihapus', 'success');
+        });
     }
+}
+
+function checkIsAdmin(email) {
+    if (!email) return false;
+    if (adminEmails.includes(email)) return true;
+    const username = email.split('@')[0].toLowerCase();
+    return username.startsWith(ADMIN_USERNAME_PREFIX);
 }
 
 function logout() {
@@ -159,8 +248,9 @@ function showToast(msg, type) {
         position: fixed; top: 20px; right: 20px; padding: 14px 24px; border-radius: 12px;
         color: #fff; z-index: 9999; animation: slideIn 0.3s ease;
         background: ${type === 'success' ? 'linear-gradient(135deg, #4caf50, #2e7d32)' : 'linear-gradient(135deg, #f44336, #c62828)'};
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     `;
     toast.textContent = msg;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
-}
+        }
