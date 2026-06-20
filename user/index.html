@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My LinkTree - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="user-style.css">
+</head>
+<body>
+    <div id="particles-js"></div>
+    
+    <div class="user-dashboard">
+        <!-- Home - Tengah -->
+        <main class="home-section">
+            <div class="profile-card">
+                <div class="profile-photo-wrapper">
+                    <img src="" alt="Profile" id="profile-photo" class="profile-photo">
+                    <label for="photo-upload" class="photo-overlay">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="photo-upload" accept="image/*" style="display:none;">
+                </div>
+                <h2 id="display-name-preview">Nama Anda</h2>
+                <p id="bio-preview">Bio singkat Anda</p>
+            </div>
+            
+            <div class="links-area">
+                <div id="links-list"></div>
+                <button class="add-link-btn" onclick="showAddLinkModal()">
+                    <i class="fas fa-plus-circle"></i> Tambah Tautan
+                </button>
+            </div>
+
+            <!-- Media Sosial -->
+            <div class="social-area">
+                <div id="social-list"></div>
+                <button class="add-social-btn" onclick="showAddSocialModal()">
+                    <i class="fas fa-share-alt"></i> Tambah Media Sosial
+                </button>
+            </div>
+        </main>
+
+        <!-- Beranda Preview - Kiri Bawah -->
+        <div id="beranda-panel" class="beranda-panel">
+            <div class="beranda-header">
+                <h3><i class="fas fa-eye"></i> Pratinjau Publik</h3>
+                <button onclick="toggleBeranda()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="beranda-content" id="beranda-content"></div>
+        </div>
+
+        <!-- Toggle Beranda Button -->
+        <button class="beranda-toggle-btn" onclick="toggleBeranda()">
+            <i class="fas fa-globe"></i>
+        </button>
+
+        <!-- Profile Settings - Bawah -->
+        <footer class="profile-settings-bar">
+            <div class="settings-row">
+                <div class="input-icon-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="display-name" placeholder="Nama Tampilan">
+                </div>
+                <div class="input-icon-group">
+                    <i class="fas fa-quote-right"></i>
+                    <input type="text" id="bio" placeholder="Bio singkat">
+                </div>
+                <button class="save-btn" onclick="saveProfile()">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Add Link Modal -->
+    <div id="link-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-link"></i> Tambah Tautan</h3>
+            <div class="input-icon-group">
+                <i class="fas fa-heading"></i>
+                <input type="text" id="link-title" placeholder="Judul Tautan">
+            </div>
+            <div class="input-icon-group">
+                <i class="fas fa-globe"></i>
+                <input type="url" id="link-url" placeholder="URL Tautan">
+            </div>
+            <div class="input-icon-group">
+                <i class="fas fa-icons"></i>
+                <input type="text" id="link-icon" placeholder="Icon (emoji)">
+            </div>
+            <div class="modal-actions">
+                <button class="save-btn" onclick="addLink()">Simpan</button>
+                <button class="cancel-btn" onclick="closeModal('link-modal')">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Social Modal -->
+    <div id="social-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-share-alt"></i> Tambah Media Sosial</h3>
+            <div class="input-icon-group">
+                <i class="fas fa-hashtag"></i>
+                <select id="social-platform">
+                    <option value="instagram">Instagram</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="github">GitHub</option>
+                    <option value="discord">Discord</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="telegram">Telegram</option>
+                </select>
+            </div>
+            <div class="input-icon-group">
+                <i class="fas fa-globe"></i>
+                <input type="url" id="social-url" placeholder="URL Profil">
+            </div>
+            <div class="modal-actions">
+                <button class="save-btn" onclick="addSocial()">Simpan</button>
+                <button class="cancel-btn" onclick="closeModal('social-modal')">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../firebase-config.js"></script>
+    <script src="../assets/particles-config.js"></script>
+    <script src="../auth-guard.js"></script>
+    <script src="user-script.js"></script>
+</body>
+</html>
