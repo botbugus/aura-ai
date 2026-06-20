@@ -1,5 +1,5 @@
 let allUsers = {};
-let adminEmails = ['admin@linktree.com'];
+let adminEmails = ['admin@admin.com'];
 
 window.addEventListener('authReady', () => {
     if (!window.isAdminUser) {
