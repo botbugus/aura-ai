@@ -3,118 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - LinkTree</title>
-    <link rel="stylesheet" href="style.css">
+    <title>LinkTree - Authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="login-style.css">
 </head>
 <body>
-    <div class="auth-container">
-        <div id="login-form" class="form-box">
-            <h2>Masuk</h2>
-            <input type="email" id="login-email" placeholder="Email" required>
-            <input type="password" id="login-password" placeholder="Kata Sandi" required>
-            <button onclick="login()">Masuk</button>
-            <p class="toggle-link" onclick="showRegister()">Belum punya akun? Daftar</p>
-            <p class="toggle-link" onclick="showForgotPassword()">Lupa kata sandi?</p>
-        </div>
+    <div id="particles-js"></div>
+    
+    <div class="auth-wrapper">
+        <div class="auth-card" id="auth-card">
+            <div class="auth-header">
+                <div class="logo-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h1>LinkTree</h1>
+                <p class="subtitle">Satu tautan, semua koneksi</p>
+            </div>
 
-        <div id="register-form" class="form-box" style="display: none;">
-            <h2>Daftar</h2>
-            <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-password" placeholder="Kata Sandi" required>
-            <input type="password" id="register-confirm-password" placeholder="Konfirmasi Kata Sandi" required>
-            <button onclick="register()">Daftar</button>
-            <p class="toggle-link" onclick="showLogin()">Sudah punya akun? Masuk</p>
-        </div>
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <h2><i class="fas fa-sign-in-alt"></i> Masuk</h2>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="login-email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="Kata Sandi" required>
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
+                </div>
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-arrow-right"></i> Masuk
+                </button>
+                <div class="auth-links">
+                    <span onclick="switchForm('register')">Buat akun baru</span>
+                    <span onclick="switchForm('forgot')">Lupa kata sandi?</span>
+                </div>
+            </form>
 
-        <div id="forgot-password-form" class="form-box" style="display: none;">
-            <h2>Lupa Kata Sandi</h2>
-            <input type="email" id="reset-email" placeholder="Email" required>
-            <button onclick="resetPassword()">Kirim Link Reset</button>
-            <p class="toggle-link" onclick="showLogin()">Kembali ke Login</p>
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form">
+                <h2><i class="fas fa-user-plus"></i> Daftar</h2>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="register-password" placeholder="Kata Sandi (min. 6 karakter)" required>
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('register-password', this)"></i>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-check-circle"></i>
+                    <input type="password" id="register-confirm" placeholder="Konfirmasi Kata Sandi" required>
+                </div>
+                <div class="role-selector">
+                    <label><i class="fas fa-user-tag"></i> Daftar Sebagai:</label>
+                    <div class="role-options">
+                        <input type="radio" name="role" value="user" id="role-user" checked>
+                        <label for="role-user" class="role-label">
+                            <i class="fas fa-user"></i> User
+                        </label>
+                        <input type="radio" name="role" value="admin" id="role-admin">
+                        <label for="role-admin" class="role-label">
+                            <i class="fas fa-crown"></i> Admin
+                        </label>
+                    </div>
+                </div>
+                <div id="admin-code-section" style="display: none;">
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="admin-code" placeholder="Kode Admin Rahasia">
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-user-plus"></i> Daftar
+                </button>
+                <div class="auth-links">
+                    <span onclick="switchForm('login')">Sudah punya akun? Masuk</span>
+                </div>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgot-form" class="auth-form">
+                <h2><i class="fas fa-key"></i> Lupa Kata Sandi</h2>
+                <p class="form-desc">Masukkan email Anda untuk menerima link reset.</p>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="reset-email" placeholder="Email terdaftar" required>
+                </div>
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-paper-plane"></i> Kirim Link Reset
+                </button>
+                <div class="auth-links">
+                    <span onclick="switchForm('login')">Kembali ke Login</span>
+                </div>
+            </form>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="firebase-config.js"></script>
-    <script>
-        function showRegister() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'block';
-            document.getElementById('forgot-password-form').style.display = 'none';
-        }
-
-        function showLogin() {
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('forgot-password-form').style.display = 'none';
-        }
-
-        function showForgotPassword() {
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('register-form').style.display = 'none';
-            document.getElementById('forgot-password-form').style.display = 'block';
-        }
-
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    alert('Login gagal: ' + error.message);
-                });
-        }
-
-        function register() {
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-
-            if (password !== confirmPassword) {
-                alert('Kata sandi tidak cocok');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('Kata sandi minimal 6 karakter');
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    db.ref('users/' + userCredential.user.uid).set({
-                        email: email,
-                        links: {},
-                        profile: {
-                            displayName: '',
-                            bio: '',
-                            photoURL: ''
-                        }
-                    });
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    alert('Pendaftaran gagal: ' + error.message);
-                });
-        }
-
-        function resetPassword() {
-            const email = document.getElementById('reset-email').value;
-            
-            auth.sendPasswordResetEmail(email)
-                .then(() => {
-                    alert('Link reset kata sandi telah dikirim ke email Anda');
-                    showLogin();
-                })
-                .catch((error) => {
-                    alert('Gagal mengirim email reset: ' + error.message);
-                });
-        }
-    </script>
+    <script src="assets/particles-config.js"></script>
+    <script src="login-script.js"></script>
 </body>
 </html>
