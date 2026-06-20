@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LinkTree</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div id="login-form" class="form-box">
+            <h2>Masuk</h2>
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Kata Sandi" required>
+            <button onclick="login()">Masuk</button>
+            <p class="toggle-link" onclick="showRegister()">Belum punya akun? Daftar</p>
+            <p class="toggle-link" onclick="showForgotPassword()">Lupa kata sandi?</p>
+        </div>
+
+        <div id="register-form" class="form-box" style="display: none;">
+            <h2>Daftar</h2>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Kata Sandi" required>
+            <input type="password" id="register-confirm-password" placeholder="Konfirmasi Kata Sandi" required>
+            <button onclick="register()">Daftar</button>
+            <p class="toggle-link" onclick="showLogin()">Sudah punya akun? Masuk</p>
+        </div>
+
+        <div id="forgot-password-form" class="form-box" style="display: none;">
+            <h2>Lupa Kata Sandi</h2>
+            <input type="email" id="reset-email" placeholder="Email" required>
+            <button onclick="resetPassword()">Kirim Link Reset</button>
+            <p class="toggle-link" onclick="showLogin()">Kembali ke Login</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('forgot-password-form').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('forgot-password-form').style.display = 'none';
+        }
+
+        function showForgotPassword() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('forgot-password-form').style.display = 'block';
+        }
+
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    alert('Login gagal: ' + error.message);
+                });
+        }
+
+        function register() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('Kata sandi tidak cocok');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Kata sandi minimal 6 karakter');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    db.ref('users/' + userCredential.user.uid).set({
+                        email: email,
+                        links: {},
+                        profile: {
+                            displayName: '',
+                            bio: '',
+                            photoURL: ''
+                        }
+                    });
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    alert('Pendaftaran gagal: ' + error.message);
+                });
+        }
+
+        function resetPassword() {
+            const email = document.getElementById('reset-email').value;
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    alert('Link reset kata sandi telah dikirim ke email Anda');
+                    showLogin();
+                })
+                .catch((error) => {
+                    alert('Gagal mengirim email reset: ' + error.message);
+                });
+        }
+    </script>
+</body>
+</html>
