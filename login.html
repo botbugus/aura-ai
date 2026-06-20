@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkTree - Authentication</title>
+    <title>LinkTree - Masuk</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="login-style.css">
 </head>
 <body>
     <div id="particles-js"></div>
-    
+
     <div class="auth-wrapper">
         <div class="auth-card">
             <div class="auth-header">
@@ -51,22 +51,6 @@
                     <i class="fas fa-check-circle"></i>
                     <input type="password" id="register-confirm" placeholder="Konfirmasi Kata Sandi" required>
                 </div>
-                <div class="role-selector">
-                    <label><i class="fas fa-user-tag"></i> Daftar Sebagai:</label>
-                    <div class="role-options">
-                        <input type="radio" name="role" value="user" id="role-user" checked>
-                        <label for="role-user" class="role-label"><i class="fas fa-user"></i> User</label>
-                        <input type="radio" name="role" value="admin" id="role-admin">
-                        <label for="role-admin" class="role-label"><i class="fas fa-crown"></i> Admin</label>
-                    </div>
-                </div>
-                <div id="admin-code-section" style="display: none;">
-                    <div class="input-group">
-                        <i class="fas fa-key"></i>
-                        <input type="password" id="admin-code" placeholder="Kode Admin Rahasia">
-                    </div>
-                    <p class="info-text">Email admin harus diawali <strong>admin</strong> (contoh: admin@xyz.com)</p>
-                </div>
                 <button type="submit" class="auth-btn"><i class="fas fa-user-plus"></i> Daftar</button>
                 <div class="auth-links">
                     <span class="link-switch" data-form="login">Sudah punya akun? Masuk</span>
@@ -75,7 +59,7 @@
 
             <form id="forgot-form" class="auth-form" autocomplete="off">
                 <h2><i class="fas fa-key"></i> Lupa Kata Sandi</h2>
-                <p class="form-desc">Masukkan email Anda untuk menerima link reset.</p>
+                <p class="form-desc">Masukkan email untuk menerima link reset.</p>
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
                     <input type="email" id="reset-email" placeholder="Email terdaftar" required>
