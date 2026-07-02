@@ -5,14 +5,15 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 
 // TODO: Replace with your actual Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBd0EP4-q2xAudz8bSVQBgqx6NrpYW5nio",
-  authDomain: "lotg-8c061.firebaseapp.com",
-  projectId: "lotg-8c061",
-  storageBucket: "lotg-8c061.firebasestorage.app",
-  messagingSenderId: "929582718987",
-  appId: "1:929582718987:web:e2e10e0983da75b815670e",
-  measurementId: "G-YKZQC2E3XK"
+  apiKey: "AIzaSyDnBXxA1OB5ycvZconZZsAyLJOPMmjeh2Y",
+  authDomain: "fireassist-x6z4a.firebaseapp.com",
+  databaseURL: "https://fireassist-x6z4a-default-rtdb.firebaseio.com",
+  projectId: "fireassist-x6z4a",
+  storageBucket: "fireassist-x6z4a.firebasestorage.app",
+  messagingSenderId: "63835497426",
+  appId: "1:63835497426:web:49356023d59f9514cfde0b"
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
