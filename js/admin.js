@@ -5,13 +5,13 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
 
 // TODO: Replace with your actual Firebase Configuration
 const firebaseConfig = {
-    apiKey: "YOUR API KEY",
-    authDomain: "YOUR AUTH DOMAIN",
-    databaseURL: "YOUR DATABASE URL",
-    projectId: "YOUR PROJECT ID",
-    storageBucket: "YOUR STORAGE BUCKET",
-    messagingSenderId: "YOUR MESSAGING SENDER ID",
-    appId: "YOUR APP ID"
+  apiKey: "AIzaSyBd0EP4-q2xAudz8bSVQBgqx6NrpYW5nio",
+  authDomain: "lotg-8c061.firebaseapp.com",
+  projectId: "lotg-8c061",
+  storageBucket: "lotg-8c061.firebasestorage.app",
+  messagingSenderId: "929582718987",
+  appId: "1:929582718987:web:e2e10e0983da75b815670e",
+  measurementId: "G-YKZQC2E3XK"
 };
 
 // Initialize Firebase
