@@ -6,13 +6,13 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10
 
 // Firebase configuration (same as main.js)
 const firebaseConfig = {
-    apiKey: "AIzaSyDdz2xtNPLV_-LO0AxFSoH7voM89aNfhhg",
-    authDomain: "judol-fafebian.firebaseapp.com",
-    databaseURL: "https://judol-fafebian-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "judol-fafebian",
-    storageBucket: "judol-fafebian.firebasestorage.app",
-    messagingSenderId: "206aboratoryi21",
-    appId: "1:206143081721:web:08c4c0458b7e52d0720749"
+  apiKey: "AIzaSyBd0EP4-q2xAudz8bSVQBgqx6NrpYW5nio",
+  authDomain: "lotg-8c061.firebaseapp.com",
+  projectId: "lotg-8c061",
+  storageBucket: "lotg-8c061.firebasestorage.app",
+  messagingSenderId: "929582718987",
+  appId: "1:929582718987:web:e2e10e0983da75b815670e",
+  measurementId: "G-YKZQC2E3XK"
 };
 
 // Initialize Firebase
